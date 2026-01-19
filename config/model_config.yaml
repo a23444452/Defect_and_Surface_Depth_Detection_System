@@ -1,0 +1,243 @@
+# ============================================
+# YOLOv11 模型配置檔案
+# ============================================
+
+# 模型基本設定
+model:
+  # 模型類型
+  type: "yolov11"
+
+  # 模型變體（n, s, m, l, x）
+  variant: "m"  # PC 平台使用 medium
+
+  # 任務類型
+  task: "segment"  # detect, segment, classify, pose
+
+  # 預訓練權重路徑
+  pretrained: "yolov11m-seg.pt"
+
+  # 自訓練權重路徑（如果有）
+  custom_weights: ""
+
+# 訓練設定
+training:
+  # 資料集路徑
+  data: "data/datasets/industrial_parts.yaml"
+
+  # 訓練參數
+  epochs: 100
+  batch_size: 16
+  imgsz: 640  # 輸入影像大小
+
+  # 優化器設定
+  optimizer: "AdamW"
+  lr0: 0.001  # 初始學習率
+  lrf: 0.01   # 最終學習率（相對於 lr0）
+  momentum: 0.937
+  weight_decay: 0.0005
+
+  # 學習率調度器
+  lr_scheduler: "cosine"  # linear, cosine
+
+  # 資料擴增
+  augmentation:
+    hsv_h: 0.015  # 色調增強
+    hsv_s: 0.7    # 飽和度增強
+    hsv_v: 0.4    # 明度增強
+    degrees: 0.0  # 旋轉角度
+    translate: 0.1  # 平移
+    scale: 0.5    # 縮放
+    shear: 0.0    # 剪切
+    perspective: 0.0  # 透視變換
+    flipud: 0.0   # 垂直翻轉機率
+    fliplr: 0.5   # 水平翻轉機率
+    mosaic: 1.0   # Mosaic 增強機率
+    mixup: 0.0    # Mixup 增強機率
+
+  # 早停設定
+  early_stopping:
+    enabled: true
+    patience: 50  # 多少個 epoch 沒進步就停止
+
+  # 儲存設定
+  save:
+    save_period: 10  # 每幾個 epoch 儲存一次
+    save_best: true  # 儲存最佳模型
+
+# 推理設定
+inference:
+  # 輸入影像大小
+  imgsz: 640
+
+  # 信心閾值
+  conf: 0.25  # 物體偵測信心閾值
+
+  # IoU 閾值（NMS）
+  iou: 0.7  # Non-Maximum Suppression 閾值
+
+  # 最大偵測數量
+  max_det: 100  # 每張影像最多偵測物體數
+
+  # 類別過濾（留空則使用所有類別）
+  classes: []  # 例如: [0, 1, 2] 只偵測特定類別
+
+  # 是否使用半精度（FP16）
+  half: false  # PC 平台可以使用 FP16 加速
+
+  # 批次大小
+  batch_size: 1
+
+  # 設備
+  device: "cuda:0"  # cuda:0, cpu
+
+# 類別設定
+classes:
+  # 類別名稱（需要根據實際資料集修改）
+  names:
+    0: "metal_part"
+    1: "plastic_part"
+    2: "composite_part"
+    3: "defect_scratch"
+    4: "defect_dent"
+    5: "defect_crack"
+
+  # 類別數量
+  nc: 6
+
+# 模型導出設定
+export:
+  # 導出格式
+  formats:
+    - "onnx"
+    - "torchscript"
+    - "engine"  # TensorRT
+
+  # ONNX 設定
+  onnx:
+    opset: 12
+    simplify: true
+    dynamic: true  # 動態批次大小
+
+  # TensorRT 設定
+  tensorrt:
+    workspace: 4  # GB
+    fp16: true    # 使用 FP16
+    int8: false   # 使用 INT8 量化（需要校準資料）
+
+# Jetson 部署設定
+jetson:
+  # 運行模式
+  mode: "full"  # full, fast, ultra_fast
+
+  # 模型變體（針對 Jetson 優化）
+  variant: "s"  # n, s（Jetson 建議使用較小模型）
+
+  # 推理設定
+  inference:
+    imgsz: 640
+    conf: 0.3
+    iou: 0.7
+    half: true  # Jetson 必須使用 FP16
+    device: "cuda:0"
+
+  # TensorRT 優化
+  tensorrt:
+    enabled: true
+    fp16: true
+    int8: false
+    workspace: 2  # GB（Jetson 記憶體較少）
+
+  # 效能調校
+  performance:
+    # CUDA 設定
+    cuda_memory_fraction: 0.8  # 使用 80% GPU 記憶體
+
+    # 批次處理
+    batch_size: 1
+
+    # 預熱次數
+    warmup_iterations: 10
+
+# 量測設定
+measurement:
+  # 3D 量測參數
+  pointcloud:
+    voxel_size: 0.001  # 體素大小（米）
+    outlier_nb_points: 16  # 離群點濾波鄰居數
+    outlier_radius: 0.01   # 離群點濾波半徑（米）
+
+  # 尺寸量測
+  dimension:
+    # OBB（方向包圍盒）設定
+    obb:
+      enabled: true
+      min_points: 100  # 最少點數
+
+    # 關鍵點距離量測
+    keypoint_distance:
+      enabled: true
+
+    # 體積計算
+    volume:
+      enabled: true
+      method: "convex_hull"  # convex_hull, voxel
+
+  # 缺陷檢測
+  defect:
+    # 表面粗糙度
+    surface_roughness:
+      enabled: true
+      threshold: 0.5  # mm
+
+    # 凹陷/凸起檢測
+    dent_protrusion:
+      enabled: true
+      threshold: 1.0  # mm
+
+    # 邊緣完整性
+    edge_integrity:
+      enabled: true
+      tolerance: 0.5  # mm
+
+# 可視化設定
+visualization:
+  # 是否顯示結果
+  show: false
+
+  # 是否儲存結果
+  save: true
+
+  # 儲存路徑
+  save_dir: "outputs/inspections"
+
+  # 繪製設定
+  line_width: 2
+  font_size: 12
+  labels: true
+  conf: true
+  boxes: true
+  masks: true
+
+# 日誌設定
+logging:
+  # 日誌等級
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+
+  # 日誌檔案
+  log_file: "outputs/logs/model.log"
+
+  # TensorBoard
+  tensorboard:
+    enabled: true
+    log_dir: "outputs/logs/tensorboard"
+
+# 效能監控
+profiling:
+  # 是否啟用效能分析
+  enabled: false
+
+  # 分析工具
+  tool: "pytorch"  # pytorch, tensorrt
+
+  # 輸出路徑
+  output_dir: "outputs/logs/profiling"

@@ -1,0 +1,153 @@
+# ============================================
+# ORBBEC Gemini 2 相機配置檔案
+# ============================================
+
+camera:
+  # 相機型號
+  model: "Gemini 2"
+
+  # 相機序號（留空則使用第一台檢測到的相機）
+  serial_number: ""
+
+  # RGB 影像設定
+  rgb:
+    width: 1920
+    height: 1080
+    fps: 30
+    format: "RGB888"  # RGB888, YUYV, MJPEG
+
+  # 深度影像設定
+  depth:
+    width: 1280
+    height: 800
+    fps: 30
+    format: "Y16"  # Y16 (16-bit depth)
+
+  # 對齊設定
+  alignment:
+    enabled: true
+    align_to: "color"  # color 或 depth
+
+  # 自動曝光設定
+  auto_exposure:
+    enabled: true
+    target_brightness: 128  # 0-255
+
+  # 白平衡設定
+  auto_white_balance:
+    enabled: true
+
+# 相機標定參數（需要實際標定後填入）
+calibration:
+  # RGB 相機內參
+  rgb_intrinsics:
+    fx: 1081.37  # 焦距 x (像素)
+    fy: 1081.37  # 焦距 y (像素)
+    cx: 959.5    # 主點 x (像素)
+    cy: 539.5    # 主點 y (像素)
+
+  # 深度相機內參
+  depth_intrinsics:
+    fx: 720.91
+    fy: 720.91
+    cx: 639.5
+    cy: 399.5
+
+  # 畸變係數 (k1, k2, p1, p2, k3)
+  distortion:
+    rgb: [0.0, 0.0, 0.0, 0.0, 0.0]
+    depth: [0.0, 0.0, 0.0, 0.0, 0.0]
+
+  # RGB 到深度的外參矩陣（旋轉 + 平移）
+  extrinsics:
+    rotation: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]  # 3x3 旋轉矩陣（展平）
+    translation: [0.0, 0.0, 0.0]  # [tx, ty, tz] 平移向量（mm）
+
+# 深度影像處理設定
+depth_processing:
+  # 深度範圍限制（mm）
+  depth_range:
+    min: 150   # 最小深度 0.15m
+    max: 3000  # 最大深度 3.0m
+
+  # 濾波設定
+  filters:
+    # 時域濾波（降噪）
+    temporal:
+      enabled: true
+      smooth_alpha: 0.4  # 平滑係數 0-1
+      smooth_delta: 20   # 閾值（mm）
+
+    # 空間濾波（邊緣保持）
+    spatial:
+      enabled: true
+      iterations: 2
+      smooth_alpha: 0.5
+      smooth_delta: 20
+
+    # 孔洞填補
+    hole_filling:
+      enabled: true
+      mode: "farest"  # farest, nearest, weighted
+
+    # 十進制濾波（降低量化誤差）
+    decimation:
+      enabled: false
+      scale: 2  # 降採樣倍數
+
+# 預處理設定
+preprocessing:
+  # RGB 影像預處理
+  rgb:
+    # 是否調整大小（用於 YOLO 輸入）
+    resize:
+      enabled: true
+      width: 640
+      height: 640
+
+    # 正規化
+    normalize:
+      enabled: true
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+
+  # 深度影像預處理
+  depth:
+    # 深度值縮放（轉換為米）
+    scale_to_meters: true
+    depth_scale: 0.001  # 1mm = 0.001m
+
+# 效能設定
+performance:
+  # 緩衝區大小
+  buffer_size: 3
+
+  # 超時設定（ms）
+  timeout: 5000
+
+  # 是否使用硬體同步
+  hardware_sync: true
+
+# 儲存設定
+save:
+  # 是否儲存原始影像
+  save_raw: false
+
+  # 儲存路徑
+  output_dir: "data/raw"
+
+  # 儲存格式
+  format:
+    rgb: "png"
+    depth: "npy"  # numpy 陣列格式
+
+# 除錯設定
+debug:
+  # 是否顯示即時影像
+  show_stream: false
+
+  # 是否列印 FPS
+  print_fps: true
+
+  # 日誌等級
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
