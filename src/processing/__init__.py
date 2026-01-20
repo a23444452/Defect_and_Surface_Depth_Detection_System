@@ -6,6 +6,8 @@
 from .depth_filter import DepthFilter
 from .coordinate_transformer import CoordinateTransformer
 from .pointcloud_generator import PointCloudGenerator, PointCloud
+from .rgbd_processor import RGBDProcessor, ProcessedFrame
+from .ai_preprocessor import AIPreprocessor
 
 __all__ = [
     # 深度處理
@@ -15,4 +17,9 @@ __all__ = [
     # 點雲生成
     "PointCloudGenerator",
     "PointCloud",
+    # RGB-D 處理
+    "RGBDProcessor",
+    "ProcessedFrame",
+    # AI 前處理
+    "AIPreprocessor",
 ]
