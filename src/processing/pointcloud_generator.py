@@ -157,8 +157,16 @@ class PointCloudGenerator:
         Returns:
             顏色陣列 (N, 3) [0-255]
         """
+        # 確保 RGB 和深度尺寸匹配
+        if depth.shape[:2] != rgb.shape[:2]:
+            import cv2
+            # 將 RGB 調整為與深度相同的解析度
+            rgb_resized = cv2.resize(rgb, (depth.shape[1], depth.shape[0]))
+        else:
+            rgb_resized = rgb
+
         # 降採樣 RGB 影像
-        rgb_sampled = rgb[::subsample, ::subsample]
+        rgb_sampled = rgb_resized[::subsample, ::subsample]
 
         # 只保留有效深度的顏色
         valid_mask = depth[::subsample, ::subsample] > 0
