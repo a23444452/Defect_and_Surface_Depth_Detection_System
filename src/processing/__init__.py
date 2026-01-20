@@ -8,6 +8,7 @@ from .coordinate_transformer import CoordinateTransformer
 from .pointcloud_generator import PointCloudGenerator, PointCloud
 from .rgbd_processor import RGBDProcessor, ProcessedFrame
 from .ai_preprocessor import AIPreprocessor
+from .performance_optimizer import PerformanceOptimizer, PerformanceMetrics, Timer
 
 __all__ = [
     # 深度處理
@@ -22,4 +23,8 @@ __all__ = [
     "ProcessedFrame",
     # AI 前處理
     "AIPreprocessor",
+    # 效能優化
+    "PerformanceOptimizer",
+    "PerformanceMetrics",
+    "Timer",
 ]

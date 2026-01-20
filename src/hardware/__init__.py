@@ -15,6 +15,7 @@ from .camera_interface import (
     CameraConfigurationError,
 )
 from .mock_camera import MockCamera
+from .fast_mock_camera import FastMockCamera
 
 # 嘗試匯入 Gemini2Camera
 try:
@@ -39,6 +40,7 @@ __all__ = [
     "CameraConfigurationError",
     # 驅動
     "MockCamera",
+    "FastMockCamera",
     "Gemini2Camera",
     "GEMINI2_AVAILABLE",
 ]
