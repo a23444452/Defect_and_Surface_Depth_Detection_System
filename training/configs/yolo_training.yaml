@@ -1,0 +1,168 @@
+# YOLOv11 訓練配置
+# 用於工業檢測物件偵測
+
+# 資料集設定
+dataset:
+  name: "industrial_inspection"
+  path: "datasets/industrial_inspection"
+  train: "train"
+  val: "val"
+  test: "test"
+
+  # 類別定義
+  classes:
+    - screw_m3
+    - screw_m6
+    - nut_hex
+    - washer
+    - pcb_board
+    - connector
+    - bracket
+    - defect_dent
+    - defect_crack
+    - defect_scratch
+
+  # 影像設定
+  image_size: [640, 640]
+  augmentation: true
+
+# 模型設定
+model:
+  name: "yolo11n"  # yolo11n, yolo11s, yolo11m, yolo11l
+  pretrained: true
+  num_classes: 10
+
+  # 模型架構
+  depth_multiple: 0.33  # n: 0.33, s: 0.33, m: 0.67, l: 1.0
+  width_multiple: 0.25  # n: 0.25, s: 0.50, m: 0.75, l: 1.0
+
+# 訓練參數
+training:
+  # 基本設定
+  epochs: 300
+  batch_size: 16
+  workers: 8
+  device: "0"  # GPU ID, 或 "cpu"
+
+  # 學習率
+  lr0: 0.01  # 初始學習率
+  lrf: 0.01  # 最終學習率 (lr0 * lrf)
+  momentum: 0.937
+  weight_decay: 0.0005
+
+  # 優化器
+  optimizer: "SGD"  # SGD, Adam, AdamW
+
+  # 學習率調度
+  lr_scheduler: "cosine"  # cosine, linear, step
+  warmup_epochs: 3
+  warmup_momentum: 0.8
+  warmup_bias_lr: 0.1
+
+  # 損失權重
+  box_loss_gain: 7.5
+  cls_loss_gain: 0.5
+  dfl_loss_gain: 1.5
+
+  # Early stopping
+  patience: 50  # epochs without improvement
+
+  # 檢查點
+  save_period: 10  # 每 N epochs 儲存一次
+  save_best: true  # 儲存最佳模型
+
+# 資料增強
+augmentation:
+  # 幾何變換
+  hsv_h: 0.015  # HSV 色相增強
+  hsv_s: 0.7    # HSV 飽和度增強
+  hsv_v: 0.4    # HSV 亮度增強
+  degrees: 0.0  # 旋轉角度 (±deg)
+  translate: 0.1  # 平移 (fraction)
+  scale: 0.5    # 縮放 (gain)
+  shear: 0.0    # 剪切 (deg)
+  perspective: 0.0  # 透視變換
+  flipud: 0.0   # 垂直翻轉機率
+  fliplr: 0.5   # 水平翻轉機率
+
+  # Mosaic / Mixup
+  mosaic: 1.0   # Mosaic 增強機率
+  mixup: 0.0    # Mixup 增強機率
+
+  # 額外增強 (工業檢測專用)
+  gaussian_noise: 0.1  # 高斯噪聲
+  blur: 0.1  # 模糊
+  brightness: 0.2  # 亮度調整
+  contrast: 0.2  # 對比度調整
+
+# 驗證設定
+validation:
+  # 驗證間隔
+  val_period: 1  # 每 N epochs 驗證一次
+
+  # 評估指標
+  metrics:
+    - "mAP@0.5"
+    - "mAP@0.5:0.95"
+    - "precision"
+    - "recall"
+
+  # NMS 設定
+  conf_threshold: 0.001  # 信心度閾值
+  iou_threshold: 0.6     # NMS IOU 閾值
+  max_det: 300           # 最大檢測數
+
+# 輸出設定
+output:
+  project: "outputs/training"
+  name: "yolo11n_industrial"
+  exist_ok: false  # 覆寫現有專案
+
+  # 視覺化
+  save_plots: true  # 儲存訓練曲線
+  save_images: true  # 儲存驗證影像
+  save_json: true   # 儲存 COCO JSON 結果
+
+# 進階設定
+advanced:
+  # 混合精度訓練
+  amp: true  # Automatic Mixed Precision
+
+  # 多 GPU 訓練
+  sync_bn: false  # Synchronized BatchNorm
+
+  # 模型 EMA (Exponential Moving Average)
+  ema: true
+  ema_decay: 0.9999
+
+  # 凍結層
+  freeze: []  # 凍結層數 (例如 [0, 1, 2])
+
+  # Dropout
+  dropout: 0.0
+
+# 日誌設定
+logging:
+  # TensorBoard
+  tensorboard: true
+  tensorboard_dir: "outputs/tensorboard"
+
+  # Weights & Biases
+  wandb: false
+  wandb_project: "industrial-inspection"
+  wandb_name: "yolo11n"
+
+  # 日誌間隔
+  log_interval: 10  # 每 N batches 記錄一次
+
+# 備註
+notes: |
+  訓練配置用於工業檢測系統
+  - 資料集: 工業零件與缺陷
+  - 模型: YOLOv11 Nano (輕量級)
+  - 目標: Jetson Orin Nano 部署
+
+  建議:
+  - 使用預訓練模型加速收斂
+  - 啟用混合精度訓練降低記憶體
+  - 調整batch_size根據GPU記憶體
